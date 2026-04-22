@@ -3,54 +3,470 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Iframe Survey Test</title>
+  <title>Survey Embed Test</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 24px;
+      background: #f7f7f9;
+      color: #222;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .guide-btn,
+    .copy-btn,
+    .close-btn {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .guide-btn {
+      background: #111827;
+      color: white;
+    }
+
+    .guide-btn:hover {
+      opacity: 0.92;
     }
 
     #status {
       margin-bottom: 16px;
-      padding: 12px;
-      border: 1px solid #ccc;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
       border-radius: 8px;
+      background: #fff;
     }
 
     iframe {
       width: 100%;
       height: 700px;
       border: 1px solid #ddd;
-      border-radius: 8px;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .note {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 999;
+      padding: 24px;
+    }
+
+    .modal-overlay.show {
+      display: block;
+    }
+
+    .modal {
+      max-width: 900px;
+      max-height: 88vh;
+      overflow: auto;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .close-btn {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .guide-section {
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .guide-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .guide-section h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .guide-section p,
+    .guide-section li {
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .guide-section ul,
+    .guide-section ol {
+      padding-left: 20px;
+    }
+
+    .code-card {
+      margin-top: 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #0f172a;
+    }
+
+    .code-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      background: #111827;
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .copy-btn {
+      background: #f3f4f6;
+      color: #111827;
+      padding: 8px 12px;
+    }
+
+    .copy-btn:hover {
+      background: #e5e7eb;
+    }
+
+    pre {
+      margin: 0;
+      padding: 16px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #e5e7eb;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    code {
+      font-family: Consolas, Monaco, monospace;
+    }
+
+    .inline-code {
+      background: #eef2ff;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 14px;
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 16px;
+      }
+
+      .header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .modal {
+        padding: 16px;
+      }
+
+      iframe {
+        height: 600px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Survey Embed Test</h1>
-  <div id="status">Waiting for survey completion...</div>
+  <div class="container">
+    <div class="header">
+      <h1>Survey Embed Test</h1>
+      <button class="guide-btn" id="openGuideBtn">Guide</button>
+    </div>
 
-  <iframe
-    src="https://emojot.com/iframetestlnksh"
-    title="Survey"
-    allow="fullscreen"
-  ></iframe>
+    <div id="status">Waiting for survey completion...</div>
+
+    <iframe
+      src="https://emojot.com/iframetestlnksh"
+      title="Survey"
+      allow="fullscreen"
+    ></iframe>
+
+    <div class="note">
+      Current test: when the survey submit button is clicked inside the iframe,
+      the iframe sends a message to this parent page using <span class="inline-code">postMessage</span>.
+    </div>
+  </div>
+
+  <!-- Guide Modal -->
+  <div class="modal-overlay" id="guideModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+      <div class="modal-header">
+        <h2 id="guideTitle">How this was done</h2>
+        <button class="close-btn" id="closeGuideBtn">Close</button>
+      </div>
+
+      <div class="guide-section">
+        <h3>1. What we wanted to achieve</h3>
+        <p>
+          We had a survey loaded inside an iframe. When the survey is submitted,
+          we wanted the parent application to know that the survey was completed.
+        </p>
+        <p>
+          Since the survey page and the parent app are on different domains,
+          the correct way to communicate is by using
+          <span class="inline-code">window.parent.postMessage(...)</span>.
+        </p>
+      </div>
+
+      <div class="guide-section">
+        <h3>2. Setup used in this test</h3>
+        <ul>
+          <li>Survey URL: <span class="inline-code">https://emojot.com/iframetestlnksh</span></li>
+          <li>Parent app URL: <span class="inline-code">https://iframetest-lnksh.vercel.app</span></li>
+          <li>Trigger used: click on the survey button with class <span class="inline-code">.btn-submit</span></li>
+          <li>Message type used: <span class="inline-code">SURVEY_COMPLETED</span></li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h3>3. How the flow works in simple terms</h3>
+        <ol>
+          <li>The parent app loads the survey inside an iframe.</li>
+          <li>The survey page listens for a click on <span class="inline-code">.btn-submit</span>.</li>
+          <li>When clicked, the survey sends a message to the parent page.</li>
+          <li>The parent page listens for that message.</li>
+          <li>When it receives the expected message from the correct origin, it updates the UI and URL.</li>
+        </ol>
+      </div>
+
+      <div class="guide-section">
+        <h3>4. Parent page code</h3>
+        <p>
+          This is the main page hosted on Vercel. It loads the iframe and listens for the completion signal.
+        </p>
+
+        <div class="code-card">
+          <div class="code-toolbar">
+            <span>Parent page listener example</span>
+            <button class="copy-btn" data-copy-target="code-parent">Copy</button>
+          </div>
+          <pre><code id="code-parent">&lt;!-- Status shown to the user --&gt;
+&lt;div id="status"&gt;Waiting for survey completion...&lt;/div&gt;
+
+&lt;!-- Survey loaded inside an iframe --&gt;
+&lt;iframe
+  src="https://emojot.com/iframetestlnksh"
+  title="Survey"
+  width="100%"
+  height="700"
+&gt;&lt;/iframe&gt;
+
+&lt;script&gt;
+  // Listen for messages coming from the iframe
+  window.addEventListener("message", function (event) {
+    console.log("message received", event.origin, event.data);
+
+    // Security check:
+    // only accept messages from the survey domain
+    if (event.origin !== "https://emojot.com") return;
+
+    // Check that this is the message we expect
+    if (event.data &amp;&amp; event.data.type === "SURVEY_COMPLETED") {
+      // Update visible status on the page
+      document.getElementById("status").textContent =
+        "Survey completed signal received";
+
+      // Update the parent URL without reloading the page
+      const url = new URL(window.location.href);
+      url.searchParams.set("surveyCompleted", "true");
+      url.searchParams.set("surveyId", event.data.surveyId || "unknown");
+      window.history.replaceState({}, "", url);
+    }
+  });
+&lt;/script&gt;</code></pre>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <h3>5. Survey page code</h3>
+        <p>
+          This script is added to the survey page. It listens for the submit button click and sends the message to the parent.
+        </p>
+
+        <div class="code-card">
+          <div class="code-toolbar">
+            <span>Survey page script example</span>
+            <button class="copy-btn" data-copy-target="code-survey">Copy</button>
+          </div>
+          <pre><code id="code-survey">&lt;script&gt;
+  (function () {
+    // Optional safety check so this only runs on the intended survey path
+    if (window.location.pathname !== "/iframetestlnksh") return;
+
+    // Listen for any click in the page
+    document.addEventListener("click", function (event) {
+      // Check whether the clicked element is the submit button
+      const btn = event.target.closest(".btn-submit");
+      if (!btn) return;
+
+      // Small delay so the survey's own click logic can run first
+      setTimeout(function () {
+        // Send a message from the iframe to the parent page
+        window.parent.postMessage(
+          {
+            type: "SURVEY_COMPLETED",
+            surveyId: "iframetestlnksh",
+            completed: true,
+            submittedAt: new Date().toISOString()
+          },
+          "https://iframetest-lnksh.vercel.app"
+        );
+      }, 150);
+    });
+  })();
+&lt;/script&gt;</code></pre>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <h3>6. Why this did not break the survey</h3>
+        <ul>
+          <li>It only listens for clicks; it does not interfere with normal behavior.</li>
+          <li>It does not use <span class="inline-code">preventDefault()</span>.</li>
+          <li>It does not stop propagation.</li>
+          <li>It only sends a passive message to the parent page.</li>
+          <li>The delay allows the survey’s normal submit logic to run first.</li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h3>7. Important note for production</h3>
+        <p>
+          In this test, the signal is sent on button click. That proves communication works.
+          For production, it is better to send the signal only after the survey is actually submitted successfully,
+          not only when the button is clicked.
+        </p>
+      </div>
+
+      <div class="guide-section">
+        <h3>8. Common issues to watch for</h3>
+        <ul>
+          <li>The iframe may be blocked by <span class="inline-code">X-Frame-Options</span> or <span class="inline-code">frame-ancestors</span>.</li>
+          <li>The target origin in <span class="inline-code">postMessage</span> must match the parent URL exactly.</li>
+          <li>The parent page must validate <span class="inline-code">event.origin</span>.</li>
+          <li>If <span class="inline-code">.btn-submit</span> changes, the selector must be updated.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
   <script>
+    // Parent page: listen for survey completion messages
     window.addEventListener("message", function (event) {
+      console.log("message received", event.origin, event.data);
+
+      // Accept messages only from the survey domain
       if (event.origin !== "https://emojot.com") return;
 
+      // Process only the expected event type
       if (event.data && event.data.type === "SURVEY_COMPLETED") {
         document.getElementById("status").textContent =
-          "Survey completed signal received.";
+          "Survey completed signal received";
 
+        // Update the URL without reloading the page
         const url = new URL(window.location.href);
         url.searchParams.set("surveyCompleted", "true");
         url.searchParams.set("surveyId", event.data.surveyId || "unknown");
         window.history.replaceState({}, "", url);
-
-        console.log("Survey completed:", event.data);
       }
+    });
+
+    // Modal open/close logic
+    const guideModal = document.getElementById("guideModal");
+    const openGuideBtn = document.getElementById("openGuideBtn");
+    const closeGuideBtn = document.getElementById("closeGuideBtn");
+
+    openGuideBtn.addEventListener("click", function () {
+      guideModal.classList.add("show");
+    });
+
+    closeGuideBtn.addEventListener("click", function () {
+      guideModal.classList.remove("show");
+    });
+
+    guideModal.addEventListener("click", function (event) {
+      if (event.target === guideModal) {
+        guideModal.classList.remove("show");
+      }
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        guideModal.classList.remove("show");
+      }
+    });
+
+    // Copy code button logic
+    document.querySelectorAll(".copy-btn").forEach(function (button) {
+      button.addEventListener("click", async function () {
+        const targetId = button.getAttribute("data-copy-target");
+        const codeElement = document.getElementById(targetId);
+
+        try {
+          await navigator.clipboard.writeText(codeElement.textContent);
+          const originalText = button.textContent;
+          button.textContent = "Copied";
+          setTimeout(function () {
+            button.textContent = originalText;
+          }, 1200);
+        } catch (error) {
+          console.error("Copy failed", error);
+          alert("Copy failed. Please copy manually.");
+        }
+      });
     });
   </script>
 </body>
