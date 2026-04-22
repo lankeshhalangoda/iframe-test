@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iframe Survey Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 24px;
+    }
+
+    #status {
+      margin-bottom: 16px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 700px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Survey Embed Test</h1>
+  <div id="status">Waiting for survey completion...</div>
+
+  <iframe
+    src="https://emojot.com/iframetestlnksh"
+    title="Survey"
+    allow="fullscreen"
+  ></iframe>
+
+  <script>
+    window.addEventListener("message", function (event) {
+      if (event.origin !== "https://emojot.com") return;
+
+      if (event.data && event.data.type === "SURVEY_COMPLETED") {
+        document.getElementById("status").textContent =
+          "Survey completed signal received.";
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("surveyCompleted", "true");
+        url.searchParams.set("surveyId", event.data.surveyId || "unknown");
+        window.history.replaceState({}, "", url);
+
+        console.log("Survey completed:", event.data);
+      }
+    });
+  </script>
+</body>
+</html>
